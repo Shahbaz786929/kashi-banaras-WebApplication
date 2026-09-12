@@ -1,0 +1,1 @@
+package com.kashibanaras.ecommerce.controller; import org.springframework.web.bind.annotation.*; import java.util.*; @RestController @RequestMapping("/api") public class HealthController{@GetMapping("/health") public Map<String,Object> health(){return Map.of("success",true,"service","kashi-banaras-api","status","UP");}}

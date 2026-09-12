@@ -1,0 +1,1 @@
+import Header from '../../components/Header'; export default function Orders(){return <><Header/><main className="section"><div className="section-title"><span>YOUR JOURNEY</span><h2>Orders</h2></div><div className="success"><h2>No orders yet</h2><p>Your future heirlooms will appear here.</p></div></main></>}

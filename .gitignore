@@ -1,0 +1,21 @@
+# env
+.env
+.env.local
+
+# node
+node_modules/
+.next/
+out/
+
+# java
+target/
+*.class
+.mvn/
+
+# ide
+.idea/
+.vscode/
+*.iml
+
+# os
+.DS_Store

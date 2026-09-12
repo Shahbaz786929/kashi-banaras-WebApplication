@@ -1,0 +1,3 @@
+package com.kashibanaras.ecommerce.controller;
+import com.kashibanaras.ecommerce.dto.ApiResponse; import com.kashibanaras.ecommerce.entity.User; import com.kashibanaras.ecommerce.repository.UserRepository; import org.springframework.security.core.Authentication; import org.springframework.web.bind.annotation.*;
+@RestController @RequestMapping("/api/me") public class MeController{private final UserRepository users;public MeController(UserRepository u){users=u;}@GetMapping public ApiResponse<User> me(Authentication a){Long id=(Long)a.getCredentials();return ApiResponse.success("Profile",users.findById(id).orElseThrow());}}

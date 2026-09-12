@@ -1,0 +1,12 @@
+package com.kashibanaras.ecommerce.controller;
+import com.kashibanaras.ecommerce.dto.ApiResponse; import com.kashibanaras.ecommerce.entity.*; import com.kashibanaras.ecommerce.repository.*; import com.kashibanaras.ecommerce.security.JwtService; import jakarta.validation.Valid; import jakarta.validation.constraints.*; import org.springframework.http.*; import org.springframework.security.crypto.password.PasswordEncoder; import org.springframework.web.bind.annotation.*; import java.util.*;
+@RestController @RequestMapping("/api/auth") public class AuthController{
+ record Register(@NotBlank String fullName,@Email @NotBlank String email,@NotBlank String phone,@Size(min=8) String password){} record Login(@Email @NotBlank String email,@NotBlank String password){} record AuthData(String accessToken,Long userId,String email,String fullName,Set<String> roles){}
+ private final UserRepository users; private final RoleRepository roles; private final PasswordEncoder encoder; private final JwtService jwt;
+ public AuthController(UserRepository u,RoleRepository r,PasswordEncoder e,JwtService j){users=u;roles=r;encoder=e;jwt=j;}
+ @PostMapping("/register") public ResponseEntity<ApiResponse<AuthData>> register(@Valid @RequestBody Register x){if(users.existsByEmail(x.email()))return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiResponse.error("Email already registered"));if(users.existsByPhone(x.phone()))return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiResponse.error("Phone already registered"));Role role=roles.findByName("ROLE_CUSTOMER").orElseThrow();User u=User.builder().fullName(x.fullName()).email(x.email().toLowerCase()).phone(x.phone()).passwordHash(encoder.encode(x.password())).active(true).roles(Set.of(role)).build();users.save(u);return ResponseEntity.ok(ApiResponse.success("Registration successful",data(u)));}
+ @PostMapping("/login")
+ public ResponseEntity<ApiResponse<AuthData>> login(@Valid @RequestBody Login x){
+  User u=users.findByEmail(x.email().toLowerCase()).orElse(null);if(u==null||!u.isActive()||!encoder.matches(x.password(),u.getPasswordHash()))return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error("Invalid email or password"));return ResponseEntity.ok(ApiResponse.success("Login successful",data(u)));}
+ private AuthData data(User u){Set<String> rs=u.getRoles().stream().map(Role::getName).collect(java.util.stream.Collectors.toSet());return new AuthData(jwt.generate(u.getId(),u.getEmail(),new ArrayList<>(rs)),u.getId(),u.getEmail(),u.getFullName(),rs);}
+}

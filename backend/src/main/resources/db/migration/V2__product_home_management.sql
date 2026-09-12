@@ -1,0 +1,3 @@
+ALTER TABLE products
+    ADD COLUMN show_on_home BOOLEAN NOT NULL DEFAULT FALSE,
+    ADD COLUMN home_sort_order INT NOT NULL DEFAULT 0;
