@@ -3,7 +3,7 @@ SET NAMES utf8mb4;
 
 CREATE TABLE roles (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  name VARCHAR(50) NOT NULL UNIQUE   -- ROLE_CUSTOMER, ROLE_ADMIN
+  name VARCHAR(50) NOT NULL UNIQUE
 ) ENGINE=InnoDB;
 
 CREATE TABLE users (
@@ -29,7 +29,7 @@ CREATE TABLE user_roles (
 CREATE TABLE addresses (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
   user_id BIGINT NOT NULL,
-  label VARCHAR(50),                 -- Home, Office
+  label VARCHAR(50),
   full_name VARCHAR(150) NOT NULL,
   phone VARCHAR(20) NOT NULL,
   line1 VARCHAR(255) NOT NULL,
@@ -76,15 +76,22 @@ CREATE TABLE products (
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (category_id) REFERENCES categories(id),
   INDEX idx_products_category (category_id),
-  INDEX idx_products_active (is_active),
-  FULLTEXT INDEX ftx_products_search (name, description, fabric, occasion)
+  INDEX idx_products_active (is_active)
 ) ENGINE=InnoDB;
 
 CREATE TABLE product_images (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
   product_id BIGINT NOT NULL,
   url VARCHAR(500) NOT NULL,
-  type ENUM('MAIN','GALLERY','CLOSE_UP','BORDER_DETAIL','PALLU_DETAIL','FABRIC_DETAIL','VIDEO') NOT NULL DEFAULT 'GALLERY',
+  type ENUM(
+    'MAIN',
+    'GALLERY',
+    'CLOSE_UP',
+    'BORDER_DETAIL',
+    'PALLU_DETAIL',
+    'FABRIC_DETAIL',
+    'VIDEO'
+  ) NOT NULL DEFAULT 'GALLERY',
   sort_order INT NOT NULL DEFAULT 0,
   FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
   INDEX idx_product_images_product (product_id)
@@ -172,8 +179,19 @@ CREATE TABLE orders (
   shipping_fee DECIMAL(10,2) NOT NULL DEFAULT 0,
   tax_amount DECIMAL(10,2) NOT NULL DEFAULT 0,
   total_amount DECIMAL(10,2) NOT NULL,
-  status ENUM('PENDING','CONFIRMED','PROCESSING','PACKED','SHIPPED','OUT_FOR_DELIVERY',
-              'DELIVERED','CANCELLED','RETURN_REQUESTED','RETURNED','REFUNDED') NOT NULL DEFAULT 'PENDING',
+  status ENUM(
+    'PENDING',
+    'CONFIRMED',
+    'PROCESSING',
+    'PACKED',
+    'SHIPPED',
+    'OUT_FOR_DELIVERY',
+    'DELIVERED',
+    'CANCELLED',
+    'RETURN_REQUESTED',
+    'RETURNED',
+    'REFUNDED'
+  ) NOT NULL DEFAULT 'PENDING',
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id),
@@ -215,7 +233,13 @@ CREATE TABLE payments (
   razorpay_payment_id VARCHAR(100),
   razorpay_signature VARCHAR(255),
   amount DECIMAL(10,2) NOT NULL,
-  status ENUM('CREATED','PENDING','PAID','FAILED','REFUNDED') NOT NULL DEFAULT 'CREATED',
+  status ENUM(
+    'CREATED',
+    'PENDING',
+    'PAID',
+    'FAILED',
+    'REFUNDED'
+  ) NOT NULL DEFAULT 'CREATED',
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
@@ -226,7 +250,7 @@ CREATE TABLE reviews (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
   product_id BIGINT NOT NULL,
   user_id BIGINT NOT NULL,
-  order_item_id BIGINT,                 -- non-null implies verified purchase
+  order_item_id BIGINT,
   rating TINYINT NOT NULL,
   review_text TEXT,
   is_approved BOOLEAN NOT NULL DEFAULT FALSE,
@@ -254,7 +278,12 @@ CREATE TABLE ai_color_previews (
   requested_color_name VARCHAR(80),
   generated_image_url VARCHAR(500),
   ai_provider VARCHAR(50) NOT NULL DEFAULT 'gemini',
-  status ENUM('PENDING','PROCESSING','COMPLETED','FAILED') NOT NULL DEFAULT 'PENDING',
+  status ENUM(
+    'PENDING',
+    'PROCESSING',
+    'COMPLETED',
+    'FAILED'
+  ) NOT NULL DEFAULT 'PENDING',
   error_message VARCHAR(500),
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id),
@@ -267,10 +296,19 @@ CREATE TABLE ai_color_previews (
 CREATE TABLE notifications (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
   user_id BIGINT NOT NULL,
-  event_type VARCHAR(80) NOT NULL,   -- ORDER_CONFIRMED, PAYMENT_SUCCESS, etc.
-  channel ENUM('EMAIL','SMS','WHATSAPP','IN_APP') NOT NULL,
+  event_type VARCHAR(80) NOT NULL,
+  channel ENUM(
+    'EMAIL',
+    'SMS',
+    'WHATSAPP',
+    'IN_APP'
+  ) NOT NULL,
   payload JSON,
-  status ENUM('PENDING','SENT','FAILED') NOT NULL DEFAULT 'PENDING',
+  status ENUM(
+    'PENDING',
+    'SENT',
+    'FAILED'
+  ) NOT NULL DEFAULT 'PENDING',
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
@@ -296,13 +334,17 @@ CREATE TABLE store_settings (
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
-INSERT INTO roles (name) VALUES ('ROLE_CUSTOMER'), ('ROLE_ADMIN');
+INSERT INTO roles (name)
+VALUES
+  ('ROLE_CUSTOMER'),
+  ('ROLE_ADMIN');
 
-INSERT INTO store_settings (setting_key, setting_value) VALUES
- ('store_name', 'Kashi Banaras'),
- ('shipping_charge', '0'),
- ('free_shipping_threshold', '0'),
- ('cod_available', 'true'),
- ('return_period_days', '7'),
- ('ai_color_studio_enabled', 'true'),
- ('maintenance_mode', 'false');
+INSERT INTO store_settings (setting_key, setting_value)
+VALUES
+  ('store_name', 'Kashi Banaras'),
+  ('shipping_charge', '0'),
+  ('free_shipping_threshold', '0'),
+  ('cod_available', 'true'),
+  ('return_period_days', '7'),
+  ('ai_color_studio_enabled', 'true'),
+  ('maintenance_mode', 'false');
